@@ -1,0 +1,8 @@
+As more players connect, the screen layout change (eg: 2 players one on top, one on bot, 3rd player connect then a new column appear on the right)
+
+
+P1           P3
+X X X X      X X X X
+
+P2
+X X X X
