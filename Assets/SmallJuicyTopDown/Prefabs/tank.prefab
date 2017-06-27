@@ -180,6 +180,7 @@ MonoBehaviour:
   bullet: {fileID: 1487569613639224, guid: 8d774c0f34991e445bd7102bc9c954fb, type: 2}
   muzzleEffect: {fileID: 1511339426819578, guid: b580336065b03de41b7a3097faef18cf,
     type: 2}
+  shotSfx: {fileID: 1784507536128882, guid: aae2112cdbee820458facade72965003, type: 2}
   cannon: {fileID: 1091006887662214}
   cannonExit: {fileID: 1330668971996814}
 --- !u!212 &212099734147355722

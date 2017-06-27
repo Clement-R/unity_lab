@@ -7,6 +7,7 @@ public class TankController : MonoBehaviour {
 
     public GameObject bullet;
     public GameObject muzzleEffect;
+    public GameObject shotSfx;
 
     public GameObject cannon;
     public GameObject cannonExit;
@@ -53,6 +54,8 @@ public class TankController : MonoBehaviour {
 
             GameObject muzzleGo = Instantiate(muzzleEffect, cannonExit.transform.position, cannon.transform.rotation);
             muzzleGo.transform.Rotate(new Vector3(0, 0, 90));
+
+            Instantiate(shotSfx, cannonExit.transform.position, cannon.transform.rotation);
         }
     }
 }
