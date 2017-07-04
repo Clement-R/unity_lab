@@ -43,7 +43,6 @@ namespace EditorOnFireFileParser {
 
         public SongProperties(byte[] file) {
             numberOfIniStrings = EOFUtility.bytesToInt16(file.Skip(25).Take(2).ToArray());
-            Debug.Log(numberOfIniStrings);
 
             if(numberOfIniStrings != 0) {
                 // iniStrings = getIniStrings(file.Skip(25).Take(2).ToArray(), ref nextByteindex);
@@ -52,7 +51,6 @@ namespace EditorOnFireFileParser {
             }
 
             numberOfIniBoolean = EOFUtility.bytesToInt16(file.Skip(nextByteindex).Take(2).ToArray());
-            Debug.Log(numberOfIniStrings);
 
             if(numberOfIniBoolean != 0) {
                 // iniBooleans = getIniBooleans(file.Skip(nextByteindex).Take(2).ToArray(), ref nextByteindex);
@@ -61,13 +59,14 @@ namespace EditorOnFireFileParser {
             }
 
             numberOfIniNumber = EOFUtility.bytesToInt16(file.Skip(nextByteindex).Take(2).ToArray());
-            Debug.Log(numberOfIniStrings);
 
             if (numberOfIniNumber != 0) {
                 // iniNumbers = getIniNumbers(file.Skip(nextByteindex).Take(2).ToArray(), ref nextByteindex);
             } else {
                 nextByteindex = 31;
             }
+
+            endByteIndex = nextByteindex;
         }
 
         IniString[] getIniStrings(byte[] section, ref int nextByteIndex) {
@@ -123,18 +122,35 @@ namespace EditorOnFireFileParser {
 
     }
 
-    public class CharData {
-        int numberOfOGGProfiles; // 2 bytes
+    public class ChartData {
+        public int endByteIndex;
+
+        int numberOfOGGProfiles = 0; // 2 bytes
         OGGProfil[] OGGProfiles;
 
-        int numberOfBeats; // 4 bytes
+        int numberOfBeats = 0; // 4 bytes
         Beat[] beats;
 
-        int numberOfTextEvents; // 4 bytes
+        int numberOfTextEvents = 0; // 4 bytes
         TextEvent[] textEvents;
 
-        int numberOfCustomDataBlock; // 4 bytes
+        int numberOfCustomDataBlock = 0; // 4 bytes
         CustomDataBlock[] customDataBlocks;
+
+        int nextByteIndex;
+
+        public ChartData(byte[] file, int startByteIndex) {
+            numberOfOGGProfiles = EOFUtility.bytesToInt16(file.Skip(startByteIndex).Take(2).ToArray());
+            Debug.Log(numberOfOGGProfiles);
+
+            nextByteIndex = startByteIndex + 2;
+
+            for (int i = 0; i < numberOfOGGProfiles; i++) {
+                OGGProfil profil = new OGGProfil(file, nextByteIndex);
+            }
+
+            endByteIndex = 0;
+        }
     }
 
     /*
@@ -148,7 +164,15 @@ namespace EditorOnFireFileParser {
         *	4 byte:		OGG profile flags (such as whether the file was originally provided as an OGG or if it was re-encoded, is being mixed with active OGG profile audio, etc)
     */
     public class OGGProfil {
+        string name;
+        string filename;
+        string description;
+        float delay;
+        int flags;
 
+        public OGGProfil(byte[] section, int startByteIndex) {
+
+        }
     }
 
     /*
@@ -185,7 +209,11 @@ namespace EditorOnFireFileParser {
         Track[] tracks;
 
         public TrackData() {
-            int numberOfTracks; // 4 bytes
+            int numberOfTracks = 0; // 4 bytes
+
+            for (int i = 0; i < numberOfTracks; i++) {
+
+            }
         }
     }
 
@@ -249,8 +277,11 @@ namespace EditorOnFireFileParser {
             // Get song properties
             SongProperties songProperties = new SongProperties(file);
 
+            // Get chart data
+            ChartData chartData = new ChartData(file, songProperties.endByteIndex);
+
             // Get tracks data
-            
+            // TrackData tracks = new TrackData(file, );
 
         }
 
