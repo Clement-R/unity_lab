@@ -10,12 +10,12 @@ using UnityEngine;
  * TODO :
 */
 namespace EditorOnFireFileParser {
-    public class CharProperties {
+    public class ChartProperties {
         public string projectRevisionNumber;
         public bool timingFormat;
         public int timeDivision = 0; // Unused for the moment
 
-        public CharProperties(byte[] file) {
+        public ChartProperties(byte[] file) {
             // Get project revision number
             // Get 4 bytes that describe the number and join them into a string with a comprehension list
             projectRevisionNumber = String.Join(".", (from header in file.Skip(16).Take(4) select Convert.ToString(header)).ToArray());
@@ -35,7 +35,7 @@ namespace EditorOnFireFileParser {
         int numberOfIniBoolean;
         int numberOfIniNumber;
 
-        int nextByteindex = 27;
+        int nextByteindex = 25;
 
         IniString[] iniStrings;
         IniBoolean[] iniBooleans;
@@ -43,29 +43,25 @@ namespace EditorOnFireFileParser {
 
         public SongProperties(byte[] file) {
             numberOfIniStrings = EOFUtility.bytesToInt16(file.Skip(25).Take(2).ToArray());
+            nextByteindex += 2;
 
-            if(numberOfIniStrings != 0) {
+            if (numberOfIniStrings != 0) {
                 // iniStrings = getIniStrings(file.Skip(25).Take(2).ToArray(), ref nextByteindex);
-            } else {
-                nextByteindex = 27;
             }
 
             numberOfIniBoolean = EOFUtility.bytesToInt16(file.Skip(nextByteindex).Take(2).ToArray());
-
-            if(numberOfIniBoolean != 0) {
+            nextByteindex += 2;
+            if (numberOfIniBoolean != 0) {
                 // iniBooleans = getIniBooleans(file.Skip(nextByteindex).Take(2).ToArray(), ref nextByteindex);
-            } else {
-                nextByteindex = 29;
             }
 
             numberOfIniNumber = EOFUtility.bytesToInt16(file.Skip(nextByteindex).Take(2).ToArray());
+            nextByteindex += 2;
 
             if (numberOfIniNumber != 0) {
-                // iniNumbers = getIniNumbers(file.Skip(nextByteindex).Take(2).ToArray(), ref nextByteindex);
-            } else {
-                nextByteindex = 31;
+                iniNumbers = getIniNumbers(file, ref nextByteindex, numberOfIniNumber);
             }
-
+            
             endByteIndex = nextByteindex;
         }
 
@@ -79,9 +75,17 @@ namespace EditorOnFireFileParser {
             return null;
         }
 
-        IniNumber[] getIniNumbers(byte[] section, ref int nextByteIndex) {
-            nextByteIndex = 0;
-            return null;
+        IniNumber[] getIniNumbers(byte[] file, ref int nextByteIndex, int numberOfIniNumber) {
+            List<IniNumber> iniNumbers = new List<IniNumber>();
+
+            file.Skip(nextByteindex).Take(2).ToArray();
+
+            for (int i = 0; i < numberOfIniNumber; i++) {
+                iniNumbers.Add(new IniNumber(file.Skip(nextByteindex).Take(5).ToArray()));
+                nextByteIndex += 5;
+            }
+
+            return iniNumbers.ToArray();
         }
     }
 
@@ -118,8 +122,18 @@ namespace EditorOnFireFileParser {
         !	Cassette color is an 8 bit intensity each for Red, Green and Blue
         !	HOPO frequency is 0-5, and is used if the player's "Song HOPO Freq" FoFiX setting is set to "Auto"
     */
+    // TODO : Rework to use a Color variable if the type is 1
     public class IniNumber {
+        public string type;
+        public int value;
 
+        public IniNumber(byte[] section) {
+            // type = Convert.ToString(section.Take(1).ToArray());
+            type = String.Join(".", (from header in section.Take(1) select Convert.ToString(header)).ToArray());
+
+            // type = EOFUtility.bytesToChar(section.Take(1).ToArray());
+            value = EOFUtility.bytesToInt32(section.Skip(1).Take(4).ToArray());
+        }
     }
 
     public class ChartData {
@@ -140,16 +154,16 @@ namespace EditorOnFireFileParser {
         int nextByteIndex;
 
         public ChartData(byte[] file, int startByteIndex) {
-            numberOfOGGProfiles = EOFUtility.bytesToInt16(file.Skip(startByteIndex).Take(2).ToArray());
-            Debug.Log(numberOfOGGProfiles);
+            nextByteIndex = startByteIndex;
 
-            nextByteIndex = startByteIndex + 2;
+            numberOfOGGProfiles = EOFUtility.bytesToInt16(file.Skip(startByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
 
             for (int i = 0; i < numberOfOGGProfiles; i++) {
-                OGGProfil profil = new OGGProfil(file, nextByteIndex);
+                OGGProfil profil = new OGGProfil(file, ref nextByteIndex);
             }
 
-            endByteIndex = 0;
+            endByteIndex = nextByteIndex;
         }
     }
 
@@ -167,11 +181,31 @@ namespace EditorOnFireFileParser {
         string name;
         string filename;
         string description;
-        float delay;
+        int delay;
         int flags;
+        
+        public OGGProfil(byte[] file, ref int nextByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
 
-        public OGGProfil(byte[] section, int startByteIndex) {
+            name = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char) character).ToString()).ToArray());
+            nextByteIndex += nameLength;
 
+            // Not used by EOF the moment, always 0
+            int filenameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            int oggProfileDescriptionLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            description = String.Join("", (from character in file.Skip(nextByteIndex).Take(oggProfileDescriptionLength) select ((char)character).ToString()).ToArray());
+            nextByteIndex += oggProfileDescriptionLength;
+
+            delay = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            flags = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
         }
     }
 
@@ -272,8 +306,8 @@ namespace EditorOnFireFileParser {
             char[] fileHeader = getFileHeader(file);
 
             // Get chart properties
-            CharProperties charProperties = new CharProperties(file);
-
+            ChartProperties chartProperties = new ChartProperties(file);
+            
             // Get song properties
             SongProperties songProperties = new SongProperties(file);
 
