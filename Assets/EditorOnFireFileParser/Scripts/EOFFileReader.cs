@@ -6,20 +6,21 @@ using System.IO;
 using UnityEngine;
 
 /*
- * TODO : Ini settings management (just not used for the moment) 
+ * TODO : Ini settings management (just not used for the moment). Code is in SongProperties class.
  * TODO :
 */
 namespace EditorOnFireFileParser {
+
     public class ChartProperties {
         public string projectRevisionNumber;
         public bool timingFormat;
-        public int timeDivision = 0; // Unused for the moment
+        public int timeDivision = 0; // Unused for the moment in EOF
 
         public ChartProperties(byte[] file) {
             // Get project revision number
             // Get 4 bytes that describe the number and join them into a string with a comprehension list
             projectRevisionNumber = String.Join(".", (from header in file.Skip(16).Take(4) select Convert.ToString(header)).ToArray());
-            
+
             timingFormat = Convert.ToBoolean(file.Skip(20).Take(1).First());
 
             timeDivision = EOFUtility.bytesToInt32(file.Skip(21).Take(4).ToArray());
@@ -46,12 +47,14 @@ namespace EditorOnFireFileParser {
             nextByteindex += 2;
 
             if (numberOfIniStrings != 0) {
+                // TODO : iniStrings data extraction
                 // iniStrings = getIniStrings(file.Skip(25).Take(2).ToArray(), ref nextByteindex);
             }
 
             numberOfIniBoolean = EOFUtility.bytesToInt16(file.Skip(nextByteindex).Take(2).ToArray());
             nextByteindex += 2;
             if (numberOfIniBoolean != 0) {
+                // TODO : iniBooleans data extraction
                 // iniBooleans = getIniBooleans(file.Skip(nextByteindex).Take(2).ToArray(), ref nextByteindex);
             }
 
@@ -61,16 +64,16 @@ namespace EditorOnFireFileParser {
             if (numberOfIniNumber != 0) {
                 iniNumbers = getIniNumbers(file, ref nextByteindex, numberOfIniNumber);
             }
-            
+
             endByteIndex = nextByteindex;
         }
 
-        IniString[] getIniStrings(byte[] section, ref int nextByteIndex) {
+        IniString[] getIniStrings(byte[] file, ref int nextByteIndex) {
             nextByteIndex = 0;
             return null;
         }
 
-        IniBoolean[] getIniBooleans(byte[] section, ref int nextByteIndex) {
+        IniBoolean[] getIniBooleans(byte[] file, ref int nextByteIndex) {
             nextByteIndex = 0;
             return null;
         }
@@ -94,14 +97,15 @@ namespace EditorOnFireFileParser {
         !	The following Icon IDs are supportedly natively in FoFiX: rb1,rb2,rbdlc,rbtpk,gh1,gh2,gh2dlc,gh3,gh3dlc,gh80s,gha,ghm,ph1,ph2,ph3,ph4,phm.  Custom icon strings can be used in FoFiX.
         !	Unlock text string is the text that FoFiX will display if this chart is not unlocked
         *	2 bytes:	INI string length
-        *	[varies:]	INI string 
+        *	[varies:]	INI string
     */
+    // TODO : IniString class implementation
     public class IniString {
         int stringType;
         int stringLength;
         string str;
 
-        public IniString(byte[] section) {
+        public IniString(byte[] file) {
 
         }
     }
@@ -112,6 +116,7 @@ namespace EditorOnFireFileParser {
         !	The low 7 bits represents the boolean INI setting in question, numbered from 0 to 127 (number 0 reserved for future use)
         !	Tutorial songs are hidden during quickplay in FoFiX
     */
+    // TODO : IniBoolean class implementation
     public class IniBoolean {
 
     }
@@ -122,6 +127,7 @@ namespace EditorOnFireFileParser {
         !	Cassette color is an 8 bit intensity each for Red, Green and Blue
         !	HOPO frequency is 0-5, and is used if the player's "Song HOPO Freq" FoFiX setting is set to "Auto"
     */
+
     // TODO : Rework to use a Color variable if the type is 1
     public class IniNumber {
         public string type;
@@ -183,7 +189,7 @@ namespace EditorOnFireFileParser {
         string description;
         int delay;
         int flags;
-        
+
         public OGGProfil(byte[] file, ref int nextByteIndex) {
             int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
             nextByteIndex += 2;
@@ -301,22 +307,21 @@ namespace EditorOnFireFileParser {
         void Start() {
             // Read file
             byte[] file = File.ReadAllBytes("Assets/EditorOnFireFileParser/Resources/notes_2.eof");
-            
+
             // Get file header
             char[] fileHeader = getFileHeader(file);
 
             // Get chart properties
             ChartProperties chartProperties = new ChartProperties(file);
-            
+
             // Get song properties
             SongProperties songProperties = new SongProperties(file);
 
             // Get chart data
-            ChartData chartData = new ChartData(file, songProperties.endByteIndex);
+            // ChartData chartData = new ChartData(file, songProperties.endByteIndex);
 
             // Get tracks data
             // TrackData tracks = new TrackData(file, );
-
         }
 
         char[] getFileHeader(byte[] file) {
