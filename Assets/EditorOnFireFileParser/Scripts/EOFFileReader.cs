@@ -135,7 +135,7 @@ namespace EditorOnFireFileParser {
 
         public IniNumber(byte[] section) {
             // type = Convert.ToString(section.Take(1).ToArray());
-            type = String.Join(".", (from header in section.Take(1) select Convert.ToString(header)).ToArray());
+            type = String.Join("", (from header in section.Take(1) select Convert.ToString(header)).ToArray());
 
             // type = EOFUtility.bytesToChar(section.Take(1).ToArray());
             value = EOFUtility.bytesToInt32(section.Skip(1).Take(4).ToArray());
@@ -146,27 +146,52 @@ namespace EditorOnFireFileParser {
         public int endByteIndex;
 
         int numberOfOGGProfiles = 0; // 2 bytes
-        OGGProfil[] OGGProfiles;
+        List<OGGProfil> OGGProfiles = new List<OGGProfil>();
 
         int numberOfBeats = 0; // 4 bytes
-        Beat[] beats;
+        List<Beat> beats = new List<Beat>();
 
         int numberOfTextEvents = 0; // 4 bytes
-        TextEvent[] textEvents;
+        List<TextEvent> textEvents = new List<TextEvent>();
 
         int numberOfCustomDataBlock = 0; // 4 bytes
-        CustomDataBlock[] customDataBlocks;
+        List<CustomDataBlock> customDataBlocks = new List<CustomDataBlock>();
 
         int nextByteIndex;
 
         public ChartData(byte[] file, int startByteIndex) {
             nextByteIndex = startByteIndex;
 
-            numberOfOGGProfiles = EOFUtility.bytesToInt16(file.Skip(startByteIndex).Take(2).ToArray());
+            // OGG data extraction
+            numberOfOGGProfiles = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
             nextByteIndex += 2;
 
             for (int i = 0; i < numberOfOGGProfiles; i++) {
-                OGGProfil profil = new OGGProfil(file, ref nextByteIndex);
+                OGGProfiles.Add(new OGGProfil(file, ref nextByteIndex));
+            }
+
+            // Beat data extraction
+            numberOfBeats = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray()); ;
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfBeats; i++) {
+                beats.Add(new Beat(file, ref nextByteIndex));
+            }
+
+            // Text event data extraction
+            numberOfTextEvents = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray()); ;
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfTextEvents; i++) {
+                textEvents.Add(new TextEvent(file, ref nextByteIndex));
+            }
+
+            // Custom data block extraction
+            numberOfCustomDataBlock = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray()); ;
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfCustomDataBlock; i++) {
+                customDataBlocks.Add(new CustomDataBlock(file, ref nextByteIndex));
             }
 
             endByteIndex = nextByteIndex;
@@ -222,7 +247,24 @@ namespace EditorOnFireFileParser {
         *	1 byte:		Key signature (If negative, the value defines the number of flats present, ie. -2 is Bb.  If positive, the value defines the number of sharps present, ie. 4 is E)
     */
     public class Beat {
+        public int ppqn;
+        public int position;
+        public int flags;
+        public char key;
 
+        public Beat(byte[] file, ref int nextByteIndex) {
+            ppqn = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            position = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            flags = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            key = (char) file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+        }
     }
 
     /*
@@ -233,7 +275,27 @@ namespace EditorOnFireFileParser {
 	        2 bytes:	Text event flags (1 = Rocksmith phrase)
     */
     public class TextEvent {
+        public string description;
+        public int beat;
+        public int trackNumber;
+        public int flags;
 
+        public TextEvent(byte[] file, ref int nextByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            description = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
+            nextByteIndex += nameLength;
+
+            beat = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            trackNumber = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            flags = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+        }
     }
 
     /*
@@ -242,36 +304,112 @@ namespace EditorOnFireFileParser {
         *	[varies:]	(Custom data, can store anything)
     */
     public class CustomDataBlock {
+        public int id;
+        public byte[] data;
 
+        public CustomDataBlock(byte[] file, ref int nextByteIndex) {
+            int numberOfBytes = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            id = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            data = file.Skip(nextByteIndex).Take(numberOfBytes - 4).ToArray();
+            nextByteIndex += numberOfBytes - 4;
+        }
     }
 
     public class TrackData {
-        Track[] tracks;
+        public int endByteIndex;
+        public List<Track> tracks = new List<Track>();
 
-        public TrackData() {
-            int numberOfTracks = 0; // 4 bytes
+        int nextByteIndex;
+
+        public TrackData(byte[] file, int startByteIndex) {
+            nextByteIndex = startByteIndex;
+
+            int numberOfTracks = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
 
             for (int i = 0; i < numberOfTracks; i++) {
-
+                tracks.Add(new Track(file, ref nextByteIndex));
             }
+
+            endByteIndex = nextByteIndex;
         }
     }
 
     public class Track {
-        string name;
-        int format;
-        int behavior;
-        int type;
-        int difficulty;
-        // flags
-        string alternateName;
+        public string name;
+        public char format;
+        public char behavior;
+        public char type;
+        public char difficulty;
+        public int flags;
+        public string alternateName;
 
-        Section[] sections;
+        List<Section> sections = new List<Section>();
+
+        int nextByteIndex;
+
+        public Track(byte[] file, ref int nextByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            name = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
+            nextByteIndex += nameLength;
+
+            format = (char)file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            behavior = (char)file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            type = (char)file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            difficulty = (char)file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            flags = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            int trackComplianceFlag = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            int numberOfSection = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            for (int i = 0; i < numberOfSection; i++) {
+                sections.Add(new Section(file, ref nextByteIndex));
+            }
+
+            int numberOfCustomDataBlock = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfCustomDataBlock; i++) {
+                // TODO : Manage custom data block
+                int tmp = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+                nextByteIndex += 4;
+
+                nextByteIndex += 4;
+
+                nextByteIndex += tmp - 4;
+            }
+        }
     }
 
     public class Section {
         int type;
         SectionChunk[] sections;
+
+        public Section(byte[] file, ref int nextByteIndex) {
+            type = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            int numberOfSectionChunk = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+        }
     }
 
     /*
@@ -283,23 +421,29 @@ namespace EditorOnFireFileParser {
         *			4 bytes:	Section flags
     */
     public class SectionChunk {
+        public SectionChunk() {
 
+        }
     }
 
     public class LegacyTrack : Track {
-
+        public LegacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+        }
     }
 
     public class ProGuitarTrack : Track {
-
+        public ProGuitarTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+        }
     }
 
     public class ProKeysTrack : Track {
-
+        public ProKeysTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+        }
     }
 
     public class LaneLefacyTrack : Track {
-
+        public LaneLefacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+        }
     }
 
     public class EOFFileReader : MonoBehaviour {
@@ -318,10 +462,10 @@ namespace EditorOnFireFileParser {
             SongProperties songProperties = new SongProperties(file);
 
             // Get chart data
-            // ChartData chartData = new ChartData(file, songProperties.endByteIndex);
+            ChartData chartData = new ChartData(file, songProperties.endByteIndex);
 
             // Get tracks data
-            // TrackData tracks = new TrackData(file, );
+            TrackData tracks = new TrackData(file, chartData.endByteIndex);
         }
 
         char[] getFileHeader(byte[] file) {
