@@ -7,7 +7,6 @@ using UnityEngine;
 
 /*
  * TODO : Ini settings management (just not used for the moment). Code is in SongProperties class.
- * TODO :
 */
 namespace EditorOnFireFileParser {
 
@@ -250,7 +249,7 @@ namespace EditorOnFireFileParser {
         public int ppqn;
         public int position;
         public int flags;
-        public char key;
+        public byte key;
 
         public Beat(byte[] file, ref int nextByteIndex) {
             ppqn = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
@@ -262,7 +261,7 @@ namespace EditorOnFireFileParser {
             flags = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
             nextByteIndex += 4;
 
-            key = (char) file.Skip(nextByteIndex).Take(1).First();
+            key = file.Skip(nextByteIndex).Take(1).First();
             nextByteIndex += 1;
         }
     }
@@ -332,23 +331,63 @@ namespace EditorOnFireFileParser {
             nextByteIndex += 4;
 
             for (int i = 0; i < numberOfTracks; i++) {
-                tracks.Add(new Track(file, ref nextByteIndex));
+                string format = getTrackFormat(file, nextByteIndex);
+
+                // Available formats in EOF file description
+                // 0=Global,1=Legacy,2=Vocal,3=Pro Keys,4=Pro Guitar/Bass,5=Variable Lane Legacy,...
+                switch (format) {
+                    case "0":
+                        GeneralTrack generalTrack = new GeneralTrack(file, ref nextByteIndex);
+                        tracks.Add(generalTrack);
+                        break;
+                    case "1":
+                        LegacyTrack legacyTrack = new LegacyTrack(file, ref nextByteIndex);
+                        tracks.Add(legacyTrack);
+                        break;
+                    case "2":
+                        VocalTrack vocalTrack = new VocalTrack(file, ref nextByteIndex);
+                        tracks.Add(vocalTrack);
+                        break;
+                    case "3":
+                        ProKeysTrack proKeysTrack = new ProKeysTrack(file, ref nextByteIndex);
+                        tracks.Add(proKeysTrack);
+                        break;
+                    case "4":
+                        ProGuitarTrack proGuitarTrack = new ProGuitarTrack(file, ref nextByteIndex);
+                        tracks.Add(proGuitarTrack);
+                        break;
+                    case "5":
+                        LaneLegacyTrack laneLegacyTrack = new LaneLegacyTrack(file, ref nextByteIndex);
+                        tracks.Add(laneLegacyTrack);
+                        break;
+                }
             }
 
             endByteIndex = nextByteIndex;
+        }
+
+        string getTrackFormat(byte[] file, int startByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            nextByteIndex += nameLength;
+            byte format = file.Skip(nextByteIndex).Take(1).First();
+
+            nextByteIndex += 1;
+            return Convert.ToString(format);
         }
     }
 
     public class Track {
         public string name;
-        public char format;
-        public char behavior;
-        public char type;
-        public char difficulty;
+        public byte format;
+        public byte behavior;
+        public byte type;
+        public byte difficulty;
         public int flags;
         public string alternateName;
 
-        List<Section> sections = new List<Section>();
+        protected List<Section> sections = new List<Section>();
 
         int nextByteIndex;
 
@@ -358,17 +397,17 @@ namespace EditorOnFireFileParser {
 
             name = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
             nextByteIndex += nameLength;
-
-            format = (char)file.Skip(nextByteIndex).Take(1).First();
+            
+            format = file.Skip(nextByteIndex).Take(1).First();
             nextByteIndex += 1;
 
-            behavior = (char)file.Skip(nextByteIndex).Take(1).First();
+            behavior = file.Skip(nextByteIndex).Take(1).First();
             nextByteIndex += 1;
 
-            type = (char)file.Skip(nextByteIndex).Take(1).First();
+            type = file.Skip(nextByteIndex).Take(1).First();
             nextByteIndex += 1;
 
-            difficulty = (char)file.Skip(nextByteIndex).Take(1).First();
+            difficulty = file.Skip(nextByteIndex).Take(1).First();
             nextByteIndex += 1;
 
             flags = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
@@ -377,6 +416,15 @@ namespace EditorOnFireFileParser {
             int trackComplianceFlag = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
             nextByteIndex += 2;
 
+            
+        }
+
+        virtual protected void getTrackData() {
+        }
+
+        protected List<Section> getSections(byte[] file, ref int nextByteIndex) {
+            List<Section> sections = new List<Section>();
+
             int numberOfSection = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
             nextByteIndex += 2;
 
@@ -384,6 +432,10 @@ namespace EditorOnFireFileParser {
                 sections.Add(new Section(file, ref nextByteIndex));
             }
 
+            return sections;
+        }
+
+        protected void getCustomDataBlocks(byte[] file, ref int nextByteIndex) {
             int numberOfCustomDataBlock = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
             nextByteIndex += 4;
 
@@ -401,7 +453,7 @@ namespace EditorOnFireFileParser {
 
     public class Section {
         int type;
-        SectionChunk[] sections;
+        List<SectionChunk> sections = new List<SectionChunk>();
 
         public Section(byte[] file, ref int nextByteIndex) {
             type = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
@@ -409,6 +461,10 @@ namespace EditorOnFireFileParser {
 
             int numberOfSectionChunk = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
             nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfSectionChunk; i++) {
+                sections.Add(new SectionChunk(file, ref nextByteIndex));
+            }
         }
     }
 
@@ -421,28 +477,103 @@ namespace EditorOnFireFileParser {
         *			4 bytes:	Section flags
     */
     public class SectionChunk {
-        public SectionChunk() {
+        string name;
+        byte difficulty;
+        int startPosition;
+        int endPosition;
+        byte[] flags;
 
+        public SectionChunk(byte[] file, ref int nextByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            name = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
+            nextByteIndex += nameLength;
+
+            difficulty = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            startPosition = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            endPosition = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            flags = file.Skip(nextByteIndex).Take(4).ToArray();
+            nextByteIndex += 4;
+        }
+    }
+
+    public class GeneralTrack : Track {
+        public GeneralTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+            // TODO : Track data
+
+            // this.sections = getSection
+            // getSections
+            // getCustomDataBlock
+        }
+
+        override protected void getTrackData() {
         }
     }
 
     public class LegacyTrack : Track {
         public LegacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+            // TODO : Track data
+
+            // getSections
+            // getCustomDataBlock
+        }
+
+        override protected void getTrackData() {
+        }
+    }
+
+    public class VocalTrack : Track {
+        public VocalTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+            // TODO : Track data
+
+            // getSections
+            // getCustomDataBlock
+        }
+
+        override protected void getTrackData() {
         }
     }
 
     public class ProGuitarTrack : Track {
         public ProGuitarTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+            // TODO : Track data
+
+            // getSections
+            // getCustomDataBlock
+        }
+
+        override protected void getTrackData() {
         }
     }
 
     public class ProKeysTrack : Track {
         public ProKeysTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+            // TODO : Track data
+
+            // getSections
+            // getCustomDataBlock
+        }
+
+        override protected void getTrackData() {
         }
     }
 
-    public class LaneLefacyTrack : Track {
-        public LaneLefacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+    public class LaneLegacyTrack : Track {
+        public LaneLegacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
+            // TODO : Track data
+
+            // getSections
+            // getCustomDataBlock
+        }
+
+        override protected void getTrackData() {
         }
     }
 
