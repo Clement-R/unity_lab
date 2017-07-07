@@ -367,13 +367,13 @@ namespace EditorOnFireFileParser {
         }
 
         string getTrackFormat(byte[] file, int startByteIndex) {
-            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
-            nextByteIndex += 2;
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(startByteIndex).Take(2).ToArray());
+            startByteIndex += 2;
 
-            nextByteIndex += nameLength;
-            byte format = file.Skip(nextByteIndex).Take(1).First();
+            startByteIndex += nameLength;
+            byte format = file.Skip(startByteIndex).Take(1).First();
 
-            nextByteIndex += 1;
+            startByteIndex += 1;
             return Convert.ToString(format);
         }
     }
@@ -397,7 +397,7 @@ namespace EditorOnFireFileParser {
 
             name = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
             nextByteIndex += nameLength;
-            
+
             format = file.Skip(nextByteIndex).Take(1).First();
             nextByteIndex += 1;
 
@@ -416,10 +416,14 @@ namespace EditorOnFireFileParser {
             int trackComplianceFlag = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
             nextByteIndex += 2;
 
-            
+            getTrackData(file, ref nextByteIndex);
+
+            sections = getSections(file, ref nextByteIndex);
+
+            getCustomDataBlocks(file, ref nextByteIndex);
         }
 
-        virtual protected void getTrackData() {
+        virtual protected void getTrackData(byte[] file, ref int nextByteIndex) {
         }
 
         protected List<Section> getSections(byte[] file, ref int nextByteIndex) {
@@ -506,74 +510,251 @@ namespace EditorOnFireFileParser {
 
     public class GeneralTrack : Track {
         public GeneralTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
-            // TODO : Track data
-
-            // this.sections = getSection
-            // getSections
-            // getCustomDataBlock
         }
 
-        override protected void getTrackData() {
+        override protected void getTrackData(byte[] file, ref int nextByteIndex) {
         }
     }
 
+    // TODO : Track data
+    /*
+        *	1 byte:		The number of lanes, keys, etc. used in this track (5 for a standard legacy track, 6 for legacy track with open strum, etc.)
+	        4 bytes:	Number of notes
+	        NOTE CHUNK, for each note
+	        {}
+    */
     public class LegacyTrack : Track {
+        byte numberOfLanes;
+        int numberOfNotes;
+        List<LegacyNote> notes = new List<LegacyNote>();
+
         public LegacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
-            // TODO : Track data
-
-            // getSections
-            // getCustomDataBlock
         }
 
-        override protected void getTrackData() {
+        override protected void getTrackData(byte[] file, ref int nextByteIndex) {
+            numberOfLanes = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            numberOfNotes = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfNotes; i++) {
+                notes.Add(new LegacyNote(file, ref nextByteIndex));
+
+                // Debug.Log(notes[i].bitFlag);
+            }
         }
     }
 
+    /*
+        * 2 bytes:	Chord name string length
+        * [varies:]	Chord name string
+		1 byte:		Note type (difficulty)
+		1 byte:		Note bitflag (on/off statuses)
+		4 bytes:	Note position (in milliseconds or delta ticks)
+		4 bytes:	Note length (in milliseconds or delta ticks)
+        * 4 bytes:	Note flags
+        [4 bytes:]	Extended note flags (if the MSB of the note flags field is set, another 4 byte flag field follows, and if its MSB is set, another 4 byte flag field, etc)
+    */
+    public class LegacyNote {
+        public string chordName;
+        public byte difficulty;
+        public byte bitFlag;
+        public int position;
+        public int length;
+        public byte[] flags;
+
+        public LegacyNote(byte[] file, ref int nextByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            chordName = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
+            nextByteIndex += nameLength;
+
+            difficulty = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            bitFlag = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            position = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            length = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            flags = file.Skip(nextByteIndex).Take(4).ToArray();
+            nextByteIndex += 4;
+
+            if(flags[0] == 2) {
+                Debug.Log("STAR POWER !");
+            }
+        }
+    }
+
+    /*
+        1 byte:		Tone set number assigned to this track (ie. 0=Grand Piano, 1=MIDI device, ...)
+        4 bytes:	Number of lyrics
+        LYRIC CHUNK, for each lyric:
+        {}
+    */
     public class VocalTrack : Track {
-        public VocalTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
-            // TODO : Track data
+        byte toneSet;
+        List<LyricChunk> lyrics = new List<LyricChunk>();
 
-            // getSections
-            // getCustomDataBlock
+        public VocalTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
         }
 
-        override protected void getTrackData() {
+        override protected void getTrackData(byte[] file, ref int nextByteIndex) {
+            toneSet = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            int numberOfLyrics = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfLyrics; i++) {
+                lyrics.Add(new LyricChunk(file, ref nextByteIndex));
+            }
         }
     }
 
+    /*
+        2 bytes:	Lyric text string length
+	    [varies:]	Lyric text string
+	    1 byte:		Lyric set number (0=PART VOCALS, 1=HARM1, 2=HARM2...)
+	    1 byte:		Note pitch
+	    4 bytes:	Lyric position (in milliseconds or delta ticks)
+	    4 bytes:	Lyric length (in milliseconds or delta ticks)
+	    2 bytes:	Lyric flags
+	    [4 bytes:]	Extended lyric flags (if the MSB of the note flags field is set, another 4 byte flag field follows, and if its MSB is set, another 4 byte flag field, etc)
+    */
+    public class LyricChunk {
+        string name;
+        byte lyricSet;
+        byte notePitch;
+        int position;
+        int length;
+        byte[] flags;
+
+        public LyricChunk(byte[] file, ref int nextByteIndex) {
+            int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+            nextByteIndex += 2;
+
+            name = String.Join("", (from character in file.Skip(nextByteIndex).Take(nameLength) select ((char)character).ToString()).ToArray());
+            nextByteIndex += nameLength;
+
+            lyricSet = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            notePitch = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            position = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            length = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            flags = file.Skip(nextByteIndex).Take(2).ToArray();
+            nextByteIndex += 2;
+        }
+    }
+
+    /*
+        *	1 byte:		The highest fret number allowed in this track (17 for Mustang, 22 for Squier)
+        *	1 byte:		The number of strings on this track's guitar (ie. 4 for standard bass guitar, 6 for standard guitar, for now, the max number supported is 8)
+        *	PRO GUITAR TUNING CHUNK, for each string (starting from the string for lane 1):
+        *	{
+        *		1 byte:		(Signed value) The number of half steps above or below (negative value) the standard tuning for this string
+        *	}
+        !		The first string defined refers to the lowest guage string (low E on a standard guitar)
+        !		The tuning information will be written to song.ini from lowest to highest guage, ie. "real_guitar_tuning (-2 0 0 0 0 0)" would indicate drop D tuning
+
+        *	4 bytes:	Number of notes
+        *	PRO GUITAR NOTE CHUNK, for each note
+        *	{
+        *		2 bytes:	Chord name string length
+        *		[varies:]	Chord name string
+        *		1 byte:		Chord number
+        *		1 byte:		Note type (difficulty)
+        *		1 byte:		Note bitflag (string use statuses: set=played, reset=not played)
+        !				Bit 0 refers to lane 1 (ie. string 6, low E), bit 5 refers to lane 6 (ie. string 1, high E), consistent with guitar terminology
+        !		1 byte:		Ghost bitflag (specifies which lanes in the note are treated as "ghost" notes, ie. for Arpeggio phrases)
+        *		FRET CHUNK, for each set bit in the guitar note bitflag
+        *		{
+        *			1 byte:		Fret # tab (0=Open strum, #=Fret # pressed, 0xFF=Muted (no fret specified), if MSB is set, the string is considered muted)
+        *		}
+        *		1 byte:		Legacy bitflags (the 5 least significant bits represent the lanes that would be set when pasting this note into a legacy track)
+        !			If the MSB is set, this bitmask was user-defined, otherwise it will be dynamically defined during the paste operation (basically just keep lanes 1-5 set/clear based on the pro guitar note's lanes)
+        *		4 bytes:	Note position (in milliseconds or delta ticks)
+        *		4 bytes:	Note length (in milliseconds or delta ticks)
+        *		4 bytes:	Note flags (allow 32 flags for an unforsee-able number of techniques such as tapping, bending, etc)
+		        [1 byte:]	Slide ending fret (if the Rocksmith notation flag, decimal value 33554432, is set and this note is flagged as having an up/down slide, value 4096 or 8192)
+		        [1 byte:]	Bend strength in half/quarter steps (if the Rocksmith notation flag, decimal value 33554432, is set and this note is flagged as a bend, value 2097152)
+				        (If the MSB of this value is set, the other 7 bits define the number of quarter steps the bend is, otherwise the value is in half steps)
+		        [1 byte:]	Unpitched slide ending fret (if this note is flagged as having an unpitched slide, value 256)
+		        [4 bytes:]	Extended note flags (if the MSB of the note flags field is set, another 4 byte flag field follows, and if its MSB is set, another 4 byte flag field, etc)
+        *	}
+
+    */
+    // Not used, we just move the byte index but we didn't store data
     public class ProGuitarTrack : Track {
         public ProGuitarTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
-            // TODO : Track data
-
-            // getSections
-            // getCustomDataBlock
         }
 
-        override protected void getTrackData() {
+        override protected void getTrackData(byte[] file, ref int nextByteIndex) {
+            nextByteIndex += 1;
+            byte numberOfStrings = file.Skip(nextByteIndex).Take(1).First();
+            nextByteIndex += 1;
+
+            for (int i = 0; i < numberOfStrings; i++) {
+                nextByteIndex += 1;
+            }
+
+            int numberOfNotes = EOFUtility.bytesToInt32(file.Skip(nextByteIndex).Take(4).ToArray());
+            nextByteIndex += 4;
+
+            for (int i = 0; i < numberOfNotes; i++) {
+                int nameLength = EOFUtility.bytesToInt16(file.Skip(nextByteIndex).Take(2).ToArray());
+                nextByteIndex += 2;
+                nextByteIndex += nameLength;
+                nextByteIndex += 1; // Chord number
+                nextByteIndex += 1; // Difficulty
+                nextByteIndex += 1; // Note bitflag
+                Debug.Log(nextByteIndex);
+                nextByteIndex += 1; // Ghost bitflag
+
+                /*
+                for (int i = 0; i < bitInGhostBitflag; i++) {
+
+                }
+                */
+
+                nextByteIndex += 1; // Legacy bitflag
+                nextByteIndex += 4; // Note position
+                nextByteIndex += 4; // Note length
+                nextByteIndex += 4; // Note flags
+            }
         }
     }
 
+    // TODO : Track data
+    // Unused for the moment in our project
     public class ProKeysTrack : Track {
         public ProKeysTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
-            // TODO : Track data
-
-            // getSections
-            // getCustomDataBlock
         }
 
-        override protected void getTrackData() {
+        override protected void getTrackData(byte[] file, ref int nextByteIndex) {
         }
     }
 
+    // TODO : Track data
+    // Unused for the moment in our project
     public class LaneLegacyTrack : Track {
         public LaneLegacyTrack(byte[] file, ref int startByteIndex) : base(file, ref startByteIndex) {
-            // TODO : Track data
-
-            // getSections
-            // getCustomDataBlock
         }
 
-        override protected void getTrackData() {
+        override protected void getTrackData(byte[] file, ref int nextByteIndex) {
         }
     }
 
@@ -597,6 +778,8 @@ namespace EditorOnFireFileParser {
 
             // Get tracks data
             TrackData tracks = new TrackData(file, chartData.endByteIndex);
+
+            Debug.Log(tracks.endByteIndex);
         }
 
         char[] getFileHeader(byte[] file) {
