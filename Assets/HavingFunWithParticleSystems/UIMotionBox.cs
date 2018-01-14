@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class UIParticleEffects : MonoBehaviour {
+public class UIMotionBox : MonoBehaviour {
 
     public float boxLength = 2f;
     public float boxHeight = 1f;
