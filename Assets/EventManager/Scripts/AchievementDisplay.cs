@@ -8,30 +8,54 @@ public class AchievementDisplay : MonoBehaviour {
     public GameObject achievementPanel;
     Text panelText;
 
-	void Start () {
+	void Start ()
+    {
         panelText = achievementPanel.transform.GetChild(0).GetComponent<Text>();
     }
 	
-    void OnEnable() {
+    void OnEnable()
+    {
+        /*
         EventManager.StartListening("playerMove", OnPlayerMove);
+        EventManager.StartListening("openInventory", OnOpenInventory);
+        */
+
+        EventManager.StartListening("playerMove", OnPlayerMove);
+        EventManager.StartListening("openInventory", OnOpenInventory);
     }
 
-    void OnDisable() {
+    void OnDisable()
+    {
+        /*
         EventManager.StopListening("playerMove", OnPlayerMove);
+        EventManager.StopListening("openInventory", OnOpenInventory);
+        */
+
+        EventManager.StopListening("playerMove", OnPlayerMove);
+        EventManager.StopListening("openInventory", OnOpenInventory);
     }
 
-    void OnPlayerMove() {
+    void OnOpenInventory(dynamic obj)
+    {
+        Debug.Log("A player opened its inventory !");
+        UnlockAchievement("Inventory opened " + obj.time);
+    }
+
+    void OnPlayerMove(dynamic obj)
+    {
         Debug.Log("A player moved !");
-        UnlockAchievement("You made it !");
+        UnlockAchievement("You made it " + obj.name + " !");
     }
 
-    void UnlockAchievement(string text) {
+    void UnlockAchievement(string text)
+    {
         achievementPanel.SetActive(true);
         panelText.text = text;
         StartCoroutine("hidePanel");
     }
 
-    IEnumerator hidePanel() {
+    IEnumerator hidePanel()
+    {
         yield return new WaitForSeconds(2.0f);
         achievementPanel.SetActive(false);
     }
