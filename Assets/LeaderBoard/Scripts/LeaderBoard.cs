@@ -71,7 +71,19 @@ public class LeaderBoard : MonoBehaviour {
 
     void Update ()
     {
-		
+		if(Input.GetKeyDown(KeyCode.A))
+        {
+            print("A");
+            Dictionary<string, string> args = new Dictionary<string, string>();
+            args.Add("username", "Scarounet");
+            args.Add("score", "50");
+            
+            POST("http://scarounet.pythonanywhere.com/scores", args, OnPost);
+        }
 	}
+
+    void OnPost()
+    {
+    }
 }
 
