@@ -19,8 +19,9 @@ namespace GravityGemEffect
 
         private void Start()
         {
+            
             _rb2d.WakeUp();
-            Vector2 explodeForce = Vector2.left + Vector2.up;
+            Vector2 explodeForce = Vector2.up + Vector2.left * Random.value + Vector2.right * Random.value;
             explodeForce.Normalize();
             explodeForce = transform.TransformDirection(explodeForce);
             explodeForce += new Vector2(Random.Range(-0.5f, 0.5f), Random.Range(-0.5f, 0.5f));
@@ -29,7 +30,7 @@ namespace GravityGemEffect
 
         void LateUpdate()
         {
-            GoTo();
+            SteeringGoTo();
         }
 
         private void GoTo()
@@ -44,6 +45,20 @@ namespace GravityGemEffect
             force *= strength;
             //force *= 0.5f;
             _rb2d.AddForce(force * Time.fixedDeltaTime);
+        }
+
+        private void SteeringGoTo()
+        {
+            Vector2 desiredVelocity = (_targetPosition - transform.position).normalized * 200f;
+            Vector2 steering = desiredVelocity - _rb2d.velocity;
+            steering = Vector2.ClampMagnitude(steering, 40f);
+            
+            //steering = truncate(steering, max_force)
+            //steering = steering / mass
+            //velocity = truncate(velocity + steering, max_speed)
+            //position = position + velocity
+            
+            _rb2d.AddForce(steering);
         }
     }
 }
