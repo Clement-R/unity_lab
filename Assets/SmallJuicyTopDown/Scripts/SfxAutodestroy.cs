@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using ObjectPooling;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SfxAutodestroy : MonoBehaviour {
+public class SfxAutodestroy : Stuff {
     AudioSource sfx;
 
     void Start() {
@@ -12,7 +13,7 @@ public class SfxAutodestroy : MonoBehaviour {
     void Update() {
         if (sfx.clip != null) {
             if (!sfx.isPlaying && sfx.clip.loadState == AudioDataLoadState.Loaded) {
-                Destroy(this.gameObject);
+                ReturnToPool();
             }
         }
     }

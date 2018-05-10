@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4648725651656878}
   - component: {fileID: 82720755054071200}
   - component: {fileID: 114899153145589932}
+  - component: {fileID: 114395478345232612}
   m_Layer: 0
   m_Name: FireSfx
   m_TagString: Untagged
@@ -121,6 +122,17 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!114 &114395478345232612
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1784507536128882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c8c395d319ec1d44ac1e392fe762b4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114899153145589932
 MonoBehaviour:
   m_ObjectHideFlags: 1
