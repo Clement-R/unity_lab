@@ -2,24 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DissolveEffect : MonoBehaviour {
-
-    public float effectDuration = 0.5f;
-
-	void Start ()
+namespace MyNamespace
+{
+    public class DissolveEffect : MonoBehaviour
     {
-        StartCoroutine(Effect());
-	}
-	
-	private IEnumerator Effect()
-    {
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        float t = 0f;
-        while (t < 1)
+
+        public float effectDuration = 0.5f;
+
+        void Start()
         {
-            t += Time.deltaTime / effectDuration;
-            sr.material.SetFloat("_Level", t);
-            yield return null;
+            StartCoroutine(Effect());
+        }
+
+        private IEnumerator Effect()
+        {
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            float t = 0f;
+            while (t < 1)
+            {
+                t += Time.deltaTime / effectDuration;
+                sr.material.SetFloat("_Level", t);
+                yield return null;
+            }
         }
     }
+
 }
