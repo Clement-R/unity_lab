@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using ObjectPooling;
 
-public class AnimationAutoDestroy : MonoBehaviour {
+public class AnimationAutoDestroy : Stuff {
 
     void Start() {
-        Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
+        Invoke("ReturnToPool", this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
     }
 }

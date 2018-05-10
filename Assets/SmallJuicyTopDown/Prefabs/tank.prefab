@@ -177,10 +177,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  bullet: {fileID: 1487569613639224, guid: 8d774c0f34991e445bd7102bc9c954fb, type: 2}
-  muzzleEffect: {fileID: 1511339426819578, guid: b580336065b03de41b7a3097faef18cf,
+  bullet: {fileID: 114706990175369610, guid: 8d774c0f34991e445bd7102bc9c954fb, type: 2}
+  muzzleEffect: {fileID: 114149296613314626, guid: b580336065b03de41b7a3097faef18cf,
     type: 2}
-  shotSfx: {fileID: 1784507536128882, guid: aae2112cdbee820458facade72965003, type: 2}
+  shotSfx: {fileID: 114395478345232612, guid: aae2112cdbee820458facade72965003, type: 2}
   cannon: {fileID: 1091006887662214}
   cannonExit: {fileID: 1330668971996814}
 --- !u!212 &212099734147355722
@@ -247,7 +247,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
+  m_SortingLayerID: -291620339
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 010c718fd09c2714aa0a27d0154093a6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

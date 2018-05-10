@@ -1,13 +1,14 @@
-﻿using System.Collections;
+﻿using ObjectPooling;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TankController : MonoBehaviour {
     public int speed = 5;
 
-    public GameObject bullet;
-    public GameObject muzzleEffect;
-    public GameObject shotSfx;
+    public Stuff bullet;
+    public Stuff muzzleEffect;
+    public Stuff shotSfx;
 
     public GameObject cannon;
     public GameObject cannonExit;
@@ -49,13 +50,20 @@ public class TankController : MonoBehaviour {
 
         // Shoot !
         if(Input.GetMouseButtonDown(0)) {
-            GameObject go = Instantiate(bullet, cannonExit.transform.position, cannon.transform.rotation);
+            // GameObject go = Instantiate(bullet, cannonExit.transform.position, cannon.transform.rotation);
+
+            Stuff go = bullet.GetPooledInstance<Stuff>();
+            go.transform.position = cannonExit.transform.position;
+            go.transform.rotation = cannon.transform.rotation;
             go.transform.Rotate(new Vector3(0, 0, 180));
 
-            GameObject muzzleGo = Instantiate(muzzleEffect, cannonExit.transform.position, cannon.transform.rotation);
+            Stuff muzzleGo = muzzleEffect.GetPooledInstance<Stuff>();
+            muzzleGo.transform.position = cannonExit.transform.position;
+            muzzleGo.transform.rotation = cannon.transform.rotation;
             muzzleGo.transform.Rotate(new Vector3(0, 0, 90));
 
-            Instantiate(shotSfx, cannonExit.transform.position, cannon.transform.rotation);
+            Stuff sfxGo = shotSfx.GetPooledInstance<Stuff>();
+            sfxGo.transform.position = cannonExit.transform.position;
         }
     }
 }

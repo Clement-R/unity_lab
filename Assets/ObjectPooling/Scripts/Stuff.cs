@@ -2,6 +2,7 @@
 using UnityEngine;
 
 namespace ObjectPooling {
+
     public class Stuff : PooledObject {
         [System.NonSerialized]
         ObjectPool poolInstanceForPrefab;
@@ -24,5 +25,5 @@ namespace ObjectPooling {
             return (T)poolInstanceForPrefab.GetObject();
         }
     }
-}
 
+}

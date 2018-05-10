@@ -9,8 +9,8 @@ namespace ObjectPooling {
         public void ReturnToPool() {
             if (Pool) {
                 Pool.AddObject(this);
-            }
-            else {
+            } else {
+                Debug.Log(Pool);
                 Destroy(gameObject);
             }
         }
