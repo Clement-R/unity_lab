@@ -56,7 +56,8 @@ public class CardBoosterOrchestrator : MonoBehaviour {
         for (int ii = 0; ii < _numberOfEffects; ii++)
         {
             Transform child = transform.GetChild(ii);
-            child.DOMoveX(child.position.x + direction * _grid.cellSize.x * 1.5f, 0.5f);
+            child.DOMoveX(child.position.x + direction * _grid.cellSize.x * 1.5f, 0.75f).SetEase(Ease.InOutElastic);
+            child.GetComponent<Shaker>().ShakeRotation(0.5f);
         }
     }
 }
