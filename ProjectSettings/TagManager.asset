@@ -45,3 +45,6 @@ TagManager:
   - name: Turret
     uniqueID: 4003346957
     locked: 0
+  - name: Card
+    uniqueID: 3091711547
+    locked: 0
