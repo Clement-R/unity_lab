@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{9CE2D200-AE27-4F32-A3A0-A40E07AA99A6}" SchemaVersion="80">
+	<SoundcasterSessions>
+		<WorkUnit Name="Default Work Unit" ID="{9CE2D200-AE27-4F32-A3A0-A40E07AA99A6}" PersistMode="Standalone">
+			<ChildrenList>
+				<SoundcasterSession Name="New Soundcaster Session" ID="{6582BE09-D032-4201-BC4D-2E64296A7E80}">
+					<RTPCValueList ShowAll="true">
+						<RTPCValue>
+							<GameParameterRef Name="master_volume" ID="{805C969E-DB73-483F-A8B9-FD23D577B845}"/>
+							<Value>50</Value>
+						</RTPCValue>
+					</RTPCValueList>
+					<CurrentStateList ShowAll="true"/>
+					<CurrentSwitchList ShowAll="true"/>
+				</SoundcasterSession>
+				<SoundcasterSession Name="soundcaster_session" ID="{8FBE4CA6-FA6D-4DD4-80E0-F460F3B7F1AF}">
+					<ModuleList>
+						<Module>
+							<ObjectRef Name="New Sound SFX" ID="{D71361F6-8C99-47FB-A6D2-555C27F27757}" WorkUnitID="{B1B9E6AC-437C-4949-8792-B0E0752F1D6A}"/>
+							<Position X="0" Y="0"/>
+						</Module>
+					</ModuleList>
+					<RTPCValueList ShowAll="true">
+						<RTPCValue>
+							<GameParameterRef Name="master_volume" ID="{805C969E-DB73-483F-A8B9-FD23D577B845}"/>
+							<Value>80</Value>
+						</RTPCValue>
+					</RTPCValueList>
+					<CurrentStateList ShowAll="true"/>
+					<CurrentSwitchList ShowAll="true"/>
+				</SoundcasterSession>
+			</ChildrenList>
+		</WorkUnit>
+	</SoundcasterSessions>
+</WwiseDocument>

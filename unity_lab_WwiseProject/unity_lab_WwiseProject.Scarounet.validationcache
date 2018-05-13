@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ValidationCache Version="1" SchemaVersion="80">
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Actor-Mixer Hierarchy\Default Work Unit.wwu" DateLow="3716186096" DateHigh="30639827"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Attenuations\Default Work Unit.wwu" DateLow="533320149" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Audio Devices\Default Work Unit.wwu" DateLow="533260078" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Control Surface Sessions\Default Work Unit.wwu" DateLow="3142950633" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Conversion Settings\Default Work Unit.wwu" DateLow="533335155" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Conversion Settings\Factory Conversion Settings.wwu" DateLow="3583751675" DateHigh="30639120"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Dynamic Dialogue\Default Work Unit.wwu" DateLow="533275093" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Effects\Default Work Unit.wwu" DateLow="533295111" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Effects\Factory Effects.wwu" DateLow="3583801799" DateHigh="30639120"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Events\Default Work Unit.wwu" DateLow="533180004" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Game Parameters\Default Work Unit.wwu" DateLow="1983074391" DateHigh="30639827"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Interactive Music Hierarchy\Default Work Unit.wwu" DateLow="533250066" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Master-Mixer Hierarchy\Default Work Unit.wwu" DateLow="1983089408" DateHigh="30639827"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Mixing Sessions\Default Work Unit.wwu" DateLow="533285099" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Modulators\Default Work Unit.wwu" DateLow="533401791" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Presets\Default Work Unit.wwu" DateLow="533310134" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Queries\Default Work Unit.wwu" DateLow="533240057" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Queries\Factory Queries.wwu" DateLow="3583851735" DateHigh="30639120"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\SoundBanks\Default Work Unit.wwu" DateLow="533381759" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Soundcaster Sessions\Default Work Unit.wwu" DateLow="3716166078" DateHigh="30639827"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\States\Default Work Unit.wwu" DateLow="533205025" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Switches\Default Work Unit.wwu" DateLow="533220039" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Triggers\Default Work Unit.wwu" DateLow="533391782" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\unity_lab_WwiseProject.Scarounet.wsettings" DateLow="3167014448" DateHigh="30639833"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\unity_lab_WwiseProject.wproj" DateLow="862528050" DateHigh="30639123"/>
+	<ValidationCacheItem File="E:\_Dev\Gamedev\unity_lab\unity_lab_WwiseProject\Virtual Acoustics\Default Work Unit.wwu" DateLow="533270087" DateHigh="30639123"/>
+</ValidationCache>
