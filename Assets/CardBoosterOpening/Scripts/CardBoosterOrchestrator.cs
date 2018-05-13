@@ -23,6 +23,11 @@ public class CardBoosterOrchestrator : MonoBehaviour {
         next.GetComponent<ButtonBehaviour>().onClick.AddListener(Next);
 
         previous.SetActive(false);
+
+        for (int ii = 0; ii < _numberOfEffects; ii++)
+        {
+            transform.GetChild(ii).position = new Vector2( (_grid.cellSize.x * 1.5f) * ii, 0f);
+        }
     }
 	
 	private void Next()
@@ -57,7 +62,7 @@ public class CardBoosterOrchestrator : MonoBehaviour {
         {
             Transform child = transform.GetChild(ii);
             child.DOMoveX(child.position.x + direction * _grid.cellSize.x * 1.5f, 0.75f).SetEase(Ease.InOutElastic);
-            child.GetComponent<Shaker>().ShakeRotation(0.5f);
+            child.GetComponent<Shaker>().ShakeRotation(0.35f, 0.15f);
         }
     }
 }
