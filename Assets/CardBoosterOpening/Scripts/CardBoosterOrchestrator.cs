@@ -16,7 +16,6 @@ public class CardBoosterOrchestrator : MonoBehaviour {
     void Start ()
     {
         _numberOfEffects = transform.childCount;
-
         _grid = GetComponent<Grid>();
 
         previous.GetComponent<ButtonBehaviour>().onClick.AddListener(Previous);

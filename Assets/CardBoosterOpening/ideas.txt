@@ -1,1 +1,9 @@
- CARD BOOSTER OPENING (DRAG & DROP, SCRATCH CARD, PITONNER, REMOVE SCRAP OF HEAD)
+ CARD BOOSTER OPENING
+	[X] DRAG & DROP head
+	[ ] SCRATCH CARD
+	[X] PITONNER
+	[ ] REMOVE SCRAP OF HEAD
+	[ ] Drag & drop in zone (Heartstone)
+	[ ] Loot box spin to win (CS:GO)
+	[ ] PUBG
+	[ ] Chest opening (Match Land)
