@@ -27,10 +27,10 @@ public class CardBoosterOrchestrator : MonoBehaviour {
         for (int ii = 0; ii < _numberOfEffects; ii++)
         {
             transform.GetChild(ii).position = new Vector2( (_grid.cellSize.x * 1.5f) * ii, 0f);
-        }
+        }   
     }
 	
-	private void Next()
+	public void Next()
     {
         _index++;
         if(_index == _numberOfEffects - 1)
@@ -43,7 +43,7 @@ public class CardBoosterOrchestrator : MonoBehaviour {
         Move(-1f);
     }
 
-    private void Previous()
+    public void Previous()
     {
         _index--;
         if(_index == 0)

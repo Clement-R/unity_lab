@@ -64,7 +64,8 @@ public class Shaker : MonoBehaviour {
             yield return null;
         }
 
-        transform.rotation = baseRotation;
+        //transform.rotation = baseRotation;
+        transform.rotation = Quaternion.identity;
     }
 
     private IEnumerator ShakePos(float duration = 0.5f)
