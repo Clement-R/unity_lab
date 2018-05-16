@@ -11,33 +11,14 @@ public class BoosterHeadScrapPiece : MonoBehaviour {
     private void Start()
     {
         _rb2d = GetComponent<Rigidbody2D>();
-        _rb2d.simulated = false;
-    }
-
-    private void Update()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(new Vector2(pos.x, pos.y), Vector2.zero);
-
-            if (hit && hit.collider.CompareTag("Wall"))
-            {
-                print(hit.collider.gameObject);
-                if (hit.collider.gameObject == gameObject)
-                {
-                    Debug.Log("This is me");
-                }
-            }
-        }
+        _rb2d.bodyType = RigidbodyType2D.Static;
     }
 
     private void OnMouseDown()
     {
-        print("Clicked");
-
-        _rb2d.simulated = true;
-        _rb2d.AddForce(new Vector2(2f, 10f), ForceMode2D.Impulse);
+        _rb2d.bodyType = RigidbodyType2D.Dynamic;
+        float rand = Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
+        _rb2d.AddForce(new Vector2(rand * 15f, 10f), ForceMode2D.Impulse);
 
         isActive = false;
     }
