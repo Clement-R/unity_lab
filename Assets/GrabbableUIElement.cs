@@ -8,7 +8,7 @@ public class GrabbableUIElement : MonoBehaviour, IDragHandler, IEndDragHandler {
     public void OnDrag(PointerEventData eventData)
     {
         Debug.Log("Drag : " + gameObject.name);
-        transform.position = Input.mousePosition;
+        transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
 
     public void OnEndDrag(PointerEventData eventData)
