@@ -1,0 +1,12 @@
+{
+    "name": "com.pkm.eventmanager",
+    "displayName": "Event Manager",
+    "version": "0.0.1",
+    "unity": "2018.1",
+    "description": "Custom event manager.",
+    "keywords": [
+        "events",
+        "unity"
+    ],
+    "category": "Unity"
+}
